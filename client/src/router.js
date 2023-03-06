@@ -1,35 +1,36 @@
 import React from 'react';
 import {createBrowserRouter} from 'react-router-dom';
 import App from './App';
-import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
-import { rootLoader } from './loaders/rootLoader';
+import Profile from './pages/Profile/Profile';
+import Register from './pages/Register/Register';
+import Login from './pages/Signin/Login';
 const Homepage = React.lazy(()=>import("./pages/Homepage/Homepage"));
-const Signup = React.lazy(()=>import("./pages/Signup/Signup"));
-const Signin = React.lazy(()=>import("./pages/Signin/Signin"));
-const Profile = React.lazy(()=>import("./pages/Profile/Profile"));
-
+// const Signup = React.lazy(()=>import("./pages/Signup/Signup"));
 export const router = createBrowserRouter([
     {
         path:'/',
         element:<App/>,
-        loader: rootLoader,
+        // loader: rootLoader,
         children:[
             {
                 index:true,
                 element: <Homepage />
             },
             {
-                path:'signup',
-                element:<Signup/>
+              path: 'login',
+              element: <Login />,
             },
             {
-                path:'signin',
-                element:<Signin />
+              path: 'register',
+              element: <Register />,
             },
             {
-                path:'profile',
-                element:<ProtectedRoute><Profile /></ProtectedRoute> 
-            }
+              path: 'profile',
+              element: (
+                  <Profile />
+              ),
+            },
+      
         ]
     }
 ]);
