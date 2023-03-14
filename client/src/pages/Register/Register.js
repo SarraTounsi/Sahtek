@@ -1,131 +1,493 @@
-import styles from  "./Register.module.scss";
-import { useMutation,gql } from '@apollo/client';
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-const Register_MUTATION = gql`
-mutation RegisterPatient($name: String!, $email: String!, $password: String!, $dateOfBirth: String!) {
-  registerPatient(name: $name, email: $email, password: $password, dateOfBirth: $dateOfBirth) {
-    name
-  }
-}
-`;
+import { useMutation } from "@apollo/client";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { LOGIN_MUTATION, REGISTER_MUTATION } from "../../apis/users";
+import {
+  Alert,
+  Button,
+  Card,
+  Col,
+  Container,
+  Form,
+  FormGroup,
+  Input,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupText,
+  Row,
+} from "reactstrap";
+import { Label } from "reactstrap/lib";
+import withGuest from "../../components/Guard/WithGuest";
+import { useDispatch } from "react-redux";
+import { userLoginSuccess } from "../../store/users/user.actions";
 
-function Register (){
+function Register() {
+  //Date From Select :
+  const [day, setDay] = useState("");
+  const [month, setMonth] = useState("");
+  const [year, setYear] = useState("");
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [email,setEmail]=useState('');
-  const [firstname,setFirstName]=useState('');
-  const [lastname,setLastName]=useState('');
-  const [password,setPassword]= useState('');
-  const [confirmPassword,setConfirmPassword]= useState('');
-  const [dateOfBirth,setdateOfBirth]= useState('');
-  const [userType,setUserType]= useState('Patient');
-  const [registerPatient,{data,loading,error}] = useMutation(Register_MUTATION);
-
-  const handleSubmit = (event) => {
-      event.preventDefault();
-      
-    const name = firstname + " " +lastname;
-    if(password.match(confirmPassword)){
-      registerPatient({ variables: {name,email, password, dateOfBirth } });
-    navigate("/login");
-    }else{
-      throw error
+  const [passwordType, setPasswordType] = useState("password");
+  const togglePassword = () => {
+    if (passwordType === "password") {
+      setPasswordType("text");
+      return;
     }
-    };
+    setPasswordType("password");
+  };
+  const handleYearChange = (event) => {
+    const selectedYear = event.target.value;
+    setYear(selectedYear);
+  };
 
-    return (
-        <section>
-        <div className={styles.formBox}>
-            <form action="" onSubmit={handleSubmit}>
-                <h2 style={{color:"#fff"}}>Register</h2>
-                <div className="row">
-                <div className="col-md-6 mb-2">
+  const handleMonthChange = (event) => {
+    const selectedMonth = event.target.value;
+    setMonth(selectedMonth);
+  };
 
-                <div className={styles.inputbox}>
-                        <input type="text" className={styles.userInput} required value={firstname} onChange={(e)=> setFirstName(e.target.value)}/>
-                        <label htmlFor="name" className={styles.userLabel} value={firstname} >First Name</label>
+  const handleDayChange = (event) => {
+    const selectedDay = event.target.value;
+    setDay(selectedDay);
+  };
+
+  const months = [
+    { name: "January", value: "01" },
+    { name: "February", value: "02" },
+    { name: "March", value: "03" },
+    { name: "April", value: "04" },
+    { name: "May", value: "05" },
+    { name: "June", value: "06" },
+    { name: "July", value: "07" },
+    { name: "August", value: "08" },
+    { name: "September", value: "09" },
+    { name: "October", value: "10" },
+    { name: "November", value: "11" },
+    { name: "December", value: "12" },
+  ];
+
+  const monthOptions = months.map((month) => (
+    <option key={month.value} value={month.value}>
+      {month.name}
+    </option>
+  ));
+
+  const daysInMonth = (year, month) => {
+    return new Date(year, month, 0).getDate();
+  };
+
+  const dayOptions = (() => {
+    if (month && year) {
+      const numDays = daysInMonth(year, month);
+      return Array.from({ length: numDays }, (_, i) => i + 1).map((day) => (
+        <option key={day} value={day}>
+          {day}
+        </option>
+      ));
+    } else {
+      return null;
+    }
+  })();
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
+  const yearOptions = years.map((year) => (
+    <option key={year} value={year}>
+      {year}
+    </option>
+  ));
+
+  const schema = yup.object().shape({
+    name: yup
+      .string()
+      .required("You should insert your name")
+      .min(2, "insert a real name"),
+    email: yup
+      .string()
+      .required("You should insert your email")
+      .email("Please insert a valid email"),
+    password: yup
+      .string()
+      .required("Please Enter your password")
+      .matches(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/,
+        "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character"
+      ),
+    role: yup.string().required("Are you a patient or therapist ?"),
+    confirmPassword: yup
+      .string()
+      .required("Confirm your password ")
+      .oneOf([yup.ref("password"), null], "Passwords must match"),
+    gender: yup.string().required("Pleanse Enter Your Gender"),
+  });
+  const initialValues = {
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    role: "",
+    gender: "",
+  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+    clearErrors,
+  } = useForm({
+    initialValues,
+    resolver: yupResolver(schema),
+  });
+  const [registerUser, { loadingP, errorP, dataP }] =
+    useMutation(REGISTER_MUTATION);
+
+  const submit = handleSubmit(
+    async ({ name, role, password, email, gender }) => {
+      try {
+        let isoDate;
+        clearErrors();
+        if (day && month && year) {
+          const dateOfBirth = new Date(year, month - 1, day); // month is 0-based in Date constructor
+          const ageDiffMs = Date.now() - dateOfBirth.getTime();
+          const ageDate = new Date(ageDiffMs); // convert the age difference to a Date object
+          const age = Math.abs(ageDate.getUTCFullYear() - 1970); // get the absolute difference in years
+          if (age < 18) {
+            setError("age", {
+              type: "value",
+              message: "You should be 18 years old or older",
+            });
+          } else {
+            isoDate = dateOfBirth.toISOString();
+          }
+        }
+        console.log(isoDate);
+        await registerUser({
+          variables: {
+            userInput: {
+              role: role,
+              name: name,
+              password: password,
+              email: email,
+              dateOfBirth: isoDate,
+              gender: gender,
+            },
+          },
+        });
+
+        navigate("/alertCheckMail");
+      } catch (error) {
+        setError("generic", { type: "generic", error });
+        console.log(errors);
+      }
+      // }
+    }
+  );
+
+  return (
+    <div
+      className="section section-image section-login"
+      style={{
+        backgroundImage:
+          "url(" + require("../../assets/img/login-image.jpg") + ")",
+      }}
+    >
+      <Container>
+        <Row>
+          <Col className="mx-auto" lg="9" md="9">
+            <Card className="card-register" style={{ maxWidth: "600px" }}>
+              <h3 className="title mx-auto">Welcome</h3>
+
+              {/* {errors?.generic && (
+                <Alert color="danger" isOpen={errors?.generic}>
+                  {errors.generic.error.message}
+                </Alert>
+              )} */}
+              <form tag={Form} className="register-form" onSubmit={submit}>
+                <Row>
+                  <Col>
+                    <label>Name</label>
+                    <InputGroup
+                      className={
+                        errors.name ? "has-danger" : "form-group-no-border"
+                      }
+                    >
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                          <i className="nc-icon nc-touch-id" />
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <input
+                        className="form-control"
+                        placeholder="Full Name"
+                        name="name"
+                        type="text"
+                        {...register("name")}
+                      />
+                    </InputGroup>
+                    {errors?.name && (
+                      <Alert color="danger" isOpen={errors?.name}>
+                        {errors.name.message}
+                      </Alert>
+                    )}
+
+                    <label>Email</label>
+                    <InputGroup
+                      className={
+                        errors.email ? "has-danger" : "form-group-no-border"
+                      }
+                    >
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                          <i className="nc-icon nc-email-85" />
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <input
+                        className="form-control"
+                        type="email"
+                        placeholder="Email"
+                        name="email"
+                        {...register("email")}
+                      />
+                    </InputGroup>
+                    {errors?.email && (
+                      <Alert color="danger" isOpen={errors?.email}>
+                        {errors.email.message}
+                      </Alert>
+                    )}
+                    <label>
+                      Birthday{" "}
+                      <span className="text-secondary"> (Start By Year )</span>
+                    </label>
+                    <div>
+                      <FormGroup className="d-flex align-items-center">
+                        <Input
+                          type="select"
+                          name="day"
+                          id="day"
+                          value={day}
+                          onChange={handleDayChange}
+                          className="me-2"
+                        >
+                          <option value="">Day</option>
+                          {dayOptions}
+                        </Input>
+                        <Input
+                          type="select"
+                          name="month"
+                          id="month"
+                          value={month}
+                          onChange={handleMonthChange}
+                          className="me-2"
+                        >
+                          <option value="">Month</option>
+                          {monthOptions}
+                        </Input>
+                        <Input
+                          type="select"
+                          name="year"
+                          id="year"
+                          value={year}
+                          onChange={handleYearChange}
+                          className={
+                            errors?.age
+                              ? "text-danger me-2"
+                              : "form-group-no-border me-2"
+                          }
+                        >
+                          <option value="">Year</option>
+                          {yearOptions}
+                        </Input>
+                      </FormGroup>
                     </div>
+                    {errors?.generic && (
+                      <Alert color="danger" isOpen={errors?.age}>
+                        {errors?.age?.message}
+                      </Alert>
+                    )}
+                  </Col>
+                  <Col>
+                    <label>Password</label>
+                    <InputGroup
+                      className={
+                        errors.password ? "has-danger" : "form-group-no-border"
+                      }
+                    >
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                          <i className="nc-icon nc-key-25" />
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <input
+                        className="form-control"
+                        placeholder="Password"
+                        name="password"
+                        type={passwordType}
+                        {...register("password")}
+                      />
+                    </InputGroup>
+                    {errors?.password && (
+                      <Alert color="danger" isOpen={errors?.password}>
+                        {errors.password.message}
+                      </Alert>
+                    )}
 
+                    <InputGroup
+                      className={
+                        errors.confirmPassword
+                          ? "has-danger"
+                          : "form-group-no-border"
+                      }
+                    >
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                          <i className="nc-icon nc-key-25" />
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <input
+                        className="form-control"
+                        placeholder="Repeat Password"
+                        name="confirmPassword"
+                        type={passwordType}
+                        {...register("confirmPassword")}
+                      />
+                    </InputGroup>
+                    {errors?.confirmPassword && (
+                      <Alert color="danger" isOpen={errors?.confirmPassword}>
+                        {errors.confirmPassword.message}
+                      </Alert>
+                    )}
+                    <FormGroup check>
+                      <Label check>
+                        <Input
+                          type="checkbox"
+                          onChange={(e) => {
+                            togglePassword();
+                          }}
+                        />{" "}
+                        Show password
+                        <span className="form-check-sign">
+                          <span className="check"></span>
+                        </span>
+                      </Label>
+                    </FormGroup>
+
+                    <label>Gender</label>
+
+                    <InputGroup className="m-auto justify-content-center">
+                      <div className="form-check-radio m-1 ">
+                        <Label className="form-check-label ">
+                          <input
+                            className="form-control"
+                            type="radio"
+                            name="gender"
+                            id="male"
+                            value="Male"
+                            {...register("gender")}
+                          />
+                          Male
+                          <span className="form-check-sign"></span>
+                        </Label>
+                      </div>
+                      <div className="form-check-radio m-1">
+                        <Label className="form-check-label">
+                          <input
+                            className="form-control"
+                            type="radio"
+                            name="gender"
+                            id="female"
+                            value="Female"
+                            {...register("gender")}
+                          />
+                          Female
+                          <span className="form-check-sign"></span>
+                        </Label>
+                      </div>
+                      <div className="form-check-radio m-1">
+                        <Label className="form-check-label">
+                          <input
+                            className="form-control"
+                            type="radio"
+                            name="gender"
+                            id="other"
+                            value="Other"
+                            {...register("gender")}
+                          />
+                          Other
+                          <span className="form-check-sign"></span>
+                        </Label>
+                      </div>
+                    </InputGroup>
+                    {errors?.gender && (
+                      <Alert color="danger" isOpen={errors?.gender}>
+                        {errors.gender.message}
+                      </Alert>
+                    )}
+                    <br />
+                  </Col>
+                </Row>
+                <div className="text-center">
+                  <label style={{}}>Are you Patient or Therapist ?</label>
                 </div>
-                <div className="col-md-6 mb-2">
 
-                <div className={styles.inputbox}>
-                        <input type="text" className={styles.userInput} required value={lastname} onChange={(e)=> setLastName(e.target.value)}/>
-                        <label htmlFor="lastname" className={styles.userLabel} >Last Name</label>
-                    </div>
-                </div>
-              </div>
-              <div className="row">
-                <div className="col-md-6 mb-1 pb-1">
-
-                <div className={styles.inputbox}>
-                    <i className="fa-solid fa-lock"></i>
-                        <input type="password"  className={styles.userInput}  required value={password} onChange={(e)=> setPassword(e.target.value)} />
-                        <label className={styles.userLabel} htmlFor="password" >Password</label>
-                    </div>
-
-                </div>
-                <div className="col-md-6 mb-1 pb-1">
-
-                <div className={styles.inputbox}>
-                        <input type="password" className={styles.userInput} required value={confirmPassword} onChange={(e)=> setConfirmPassword(e.target.value)}/>
-                        <label htmlFor="password" className={styles.userLabel} >Confirm Password</label>
-                    </div>
-                </div>
-              </div>
-              <div className="row">
-                <div className="col-md-6 mb-2 d-flex align-items-center">
-
-                <div className={styles.inputbox}>
-                        <input type="email" className={styles.userInput} required value={email} onChange={(e)=> setEmail(e.target.value)}/>
-                        <label htmlFor="email" className={styles.userLabel} >Email</label>
-                    </div>
-
-                </div>
-                {/* <div className="col-md-6 mt-4" style={{color:"white"}}>
-
-                  <h6 className="mb-2 pb-1" style={{color:"#fff"}}>Gender: </h6>
-
-                  <div className=" form-check-inline">
-                    <input className="form-check-input" type="radio" name="inlineRadioOptions" id="femaleGender"
-                      value="FEMALE"  onChange={(e)=> setFirstName(e.target.value)}/>
-                    <label className="form-check-label" htmlFor="femaleGender">Female</label>
+                <InputGroup className="m-auto justify-content-center">
+                  <div className="form-check-radio m-1 ">
+                    <Label className="form-check-label ">
+                      <input
+                        className="form-control"
+                        type="radio"
+                        name="role"
+                        id="patient"
+                        value="Patient"
+                        {...register("role")}
+                      />
+                      Patient
+                      <span className="form-check-sign"></span>
+                    </Label>
                   </div>
-
-                  <div className="form-check form-check-inline">
-                    <input className="form-check-input" type="radio" name="inlineRadioOptions" id="maleGender"
-                      value="MALE" onChange={(e)=> setFirstName(e.target.value)}/>
-                    <label className="form-check-label" htmlFor="maleGender">Male</label>
+                  <div className="form-check-radio m-1">
+                    <Label className="form-check-label">
+                      <input
+                        className="form-control"
+                        type="radio"
+                        name="role"
+                        id="therapist"
+                        value="Therapist"
+                        {...register("role")}
+                      />
+                      Therapist
+                      <span className="form-check-sign"></span>
+                    </Label>
                   </div>
-
-                  <div className="form-check form-check-inline">
-                    <input className="form-check-input" type="radio" name="inlineRadioOptions" id="otherGender"
-                      value="OTHER" onChange={(e)=> set(e.target.value)}/>
-                    <label className="form-check-label" htmlFor="otherGender">Other</label>
-                  </div>
-
-                </div> */}
+                </InputGroup>
+                {errors?.role && (
+                  <Alert color="danger" isOpen={errors?.role}>
+                    {errors.role.message}
+                  </Alert>
+                )}
+                <Button
+                  block
+                  className="btn-round"
+                  color="danger"
+                  type="submit"
+                  disabled={isSubmitting}
+                >
+                  Register
+                </Button>
+              </form>
+              <div className="forgot">
+                <Button className="btn-link" color="danger">
+                  Already have an <Link to="/login">account</Link> ?
+                </Button>
               </div>
-              <div className="row justify-content-center"  >
-              <div className={styles.inputbox} >
-                        <input type="date" className={styles.userInput} required value={dateOfBirth} onChange={(e)=> setdateOfBirth(e.target.value)}/>
-
-                    </div>
-              </div>
-
-             
-              <div >
-                <button>Resgister</button>
-              </div>
-              <div className={styles.forget+" form-check"}>
-                        <label className="lab form-check-label" htmlFor="">Already have an account? <a href="#" > <strong>Login instead</strong></a></label>
-                        
-                    </div>
-            </form>
-
-        </div>
-    </section>
-    )
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+    </div>
+  );
 }
 
-export default Register;
+export default withGuest(Register);

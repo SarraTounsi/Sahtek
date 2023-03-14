@@ -5,11 +5,13 @@ const patientFile = require("./patientFile");
 const postT = require("./post")
 const commentT = require("./comment")
 const userT = require('./user')
-const ProductT = require("./product")
+const ProductT = require("./product");
+const verificationToken = require("./verificationToken");
 
  
 
 const rootType = gql`
+  scalar Upload
   type Query {
     root: String
   }
@@ -27,6 +29,7 @@ module.exports= [
     postT,
     commentT,
     userT,
-    ProductT
+    ProductT,
+    verificationToken
         
 ]
