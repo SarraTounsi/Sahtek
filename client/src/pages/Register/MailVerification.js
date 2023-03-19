@@ -8,25 +8,42 @@ import {
 } from "../../apis/users";
 import { userLogout } from '../../store/users/user.actions';
 
-import { Button, Container, Row, Col, Alert } from "reactstrap";
+import { Button, Container, Row, Col, Alert, Form, Input, InputGroupAddon, } from "reactstrap";
 import { useDispatch } from "react-redux";
+ import { useForm } from "react-hook-form";
 
 function MailVerification() {
   const navigate = useNavigate();
   const [showAlert, setAlert] = useState(false);
   const [isHiddesn, setisHiddesn] = useState(false);
   const [validUrl, setValidUrl] = useState();
-  
+
   const [resendMailVerification, { loading, error, data }] = useMutation(
     RESEND_MAIL_VERIFICATION_MUTATION
   );
-  const tokenValue = useParams("token");
   const userid = useParams("userId");
   const dispatch = useDispatch();
   const handleClick = () => {
     dispatch(userLogout());
     navigate("/login");
   };
+  const initialValues = {
+    code: "",
+ 
+  };
+
+  const {
+    handleSubmit,
+  
+  } = useForm({
+    initialValues,
+   
+  });
+
+  const [verifyToken, { loadingP, errorP, dataP }] = useMutation(
+    VERIFY_TOKEN_MUTATION
+  );
+
 
   const ResendMail = () => {
     async function resendMail() {
@@ -41,13 +58,14 @@ function MailVerification() {
         setAlert(true);
       } else if (data.resendMailVerification === "user not found") {
       }
+
     }
     resendMail();
+    navigate("/mail-verification/:userId")
   };
 
-  const [verifyToken, { loadingP, errorP, dataP }] = useMutation(
-    VERIFY_TOKEN_MUTATION
-  );
+ 
+
 
   let pageHeader = React.createRef();
 
@@ -65,14 +83,13 @@ function MailVerification() {
     }
   });
 
-  useEffect(() => {
-    try {
-      async function verification() {
+  const submit = handleSubmit(async ({ code }) => {
+      try {
         const { data } = await verifyToken({
           variables: {
             userId: userid.userId,
             verificationTokenInput: {
-              token: tokenValue.token,
+              token: code,
             },
           },
         });
@@ -84,17 +101,65 @@ function MailVerification() {
           setValidUrl("expired");
         } else if (data.verifyToken === "not found") {
           setValidUrl("not found");
+        } else if (data.verifyToken === "invalid code") {
+          setValidUrl("not found");
         }
-      }
-      verification();
+      
+     
     } catch (error) {
       console.log(error);
     }
-  }, [userid, tokenValue]);
+  });
 
   return (
     <Fragment>
-      {validUrl === "success" ? (
+      {validUrl === '' ? (<div
+        className="section section-image  "
+        style={{ height: "100vh", paddingTop: "250px" }}
+      >
+        <div className="section">
+          <Container className="text-center bg-light ">
+            <Row>
+              <Col className="ml-auto mr-auto text-center" md="8">
+                <h2 className=" text-danger mb-5">Verify your email</h2>
+                <p className="note mt-5">
+                  We have sent you an email to verify your email address and
+                  activate your<a href="https://mail.google.com/mail/u/"> account. </a>
+
+                </p>
+                <br />
+                <p> Enter the provided code:</p>
+
+                <Form className="contact-form">
+                  <Row>
+                    <Col>
+
+
+                      <InputGroupAddon addonType="prepend">
+                      </InputGroupAddon>
+                      <Input placeholder="Code" type="text" name="code" />
+
+                    </Col>
+
+                  </Row>
+
+                  <Row>
+                    <Col className="ml-auto mr-auto" md="4">
+                      <Button className="btn-fill" color="danger" size="lg">
+                        Verify My Account
+                      </Button>
+                    </Col>
+                  </Row>
+                </Form>
+
+
+              </Col>
+
+
+            </Row>
+          </Container>
+        </div>
+      </div>) : validUrl === "success" ? (
         <div
           style={{
             backgroundColor: "#6bd098",

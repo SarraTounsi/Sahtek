@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Button, Container, Row, Col, Alert } from "reactstrap";
+import { Button, Container, Row, Col, Form, Input, InputGroupAddon, InputGroup } from "reactstrap";
 
 function AlertCheckMail() {
   return (
@@ -15,10 +15,10 @@ function AlertCheckMail() {
               <h2 className=" text-danger mb-5">Verify your email</h2>
               <p className="note mt-5">
                 We have sent you an email to verify your email address and
-                activate your account. The link in the email will expire in
-                1hour
-                <br />
-                <a
+                activate your account. <a href="https://mail.google.com/mail/u/">Click here</a>
+                <b /> Enter the provided code.
+              </p>
+              {/* <a
                   className="btn btn-primary mt-5"
                   rel="noreferrer"
                   href="https://mail.google.com/mail/u/"
@@ -26,11 +26,33 @@ function AlertCheckMail() {
                 >
                   {" "}
                   CLick Here
-                </a>
-              </p>
+                </a> */}
+              <Form className="contact-form">
+                <Row>
+                  <Col>
+
+
+                    <InputGroupAddon addonType="prepend">
+                    </InputGroupAddon>
+                    <Input placeholder="Code" type="text" />
+
+                  </Col>
+
+                </Row>
+
+                <Row>
+                  <Col className="ml-auto mr-auto" md="4">
+                    <Button className="btn-fill" color="danger" size="lg">
+                      Verify My Account
+                    </Button>
+                  </Col>
+                </Row>
+              </Form>
+
+
             </Col>
 
-            <Row></Row>
+
           </Row>
         </Container>
       </div>

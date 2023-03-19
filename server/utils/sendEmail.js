@@ -48,17 +48,18 @@ module.exports = async (email, subject, text) => {
 					
 					 
 					  <p   style=" margin-bottom: 0px; font-size: 17px;
-				  color: #1b1b1b;  ">Hello! Please click the button below to verify your email address.</p>
-					 <a   href="${text}">
-					   <button style="width: 100%;
+				  color: #1b1b1b;  ">Hello! Please use the verification code below to confirm this email address for your account.</p>
+					 
+					   <h2 style="width: 100%;
 					   margin-top: 40px;
 						   margin-bottom: 20px;
+						   text-align: center;
 				  
-					  background   :#51cbce ;
-					   color: #ffffff;
+					  background   :#cdf0f0 ;
+					   color: #403D39;
 					  padding:15px;
-					font-size: 17px;
-					  border-radius: 15px;  border-width: 0px"  class="btn btn-primary ">Verify Email</button></a>
+					  font-size: 20px; font-weight: 700;
+					  border-radius: 15px;  border-width: 0px;  letter-spacing: 2px;"  class="btn btn-primary ">${text}</h2> 
 				   </form> 
 			 
 				

@@ -1,6 +1,7 @@
 const verificationToken = require('../../database/models/verificationToken');
 const { Patient, Therapist, User } = require('../../database/models/User');
 const { ObjectId } = require('mongoose/lib/schema/index');
+const bcrypt = require("bcrypt");
 
 const mailVerification = {
 
@@ -9,30 +10,34 @@ const mailVerification = {
         verifyToken: async (parent, args, context, info) => {
             const { userId } = args;
             const { token } = args.verificationTokenInput;
-            const Token = await verificationToken.findOne({ token });
+            const savedToken = await verificationToken.findOne({ userId });
             const user = await User.findById(userId);
-            if (Token) {
-                await verificationToken.findOneAndDelete({ token }, { userId })
-                await User.findByIdAndUpdate(userId, { verified: true });
-                console.log("your account is verified");
-                return "success"
+            if (savedToken) {
+                const result = await bcrypt.compareSync(token, savedToken.token);
+
+                if (result) {
+                    await verificationToken.findOneAndDelete({ userId })
+                    await User.findByIdAndUpdate(userId, { verified: true });
+                    console.log("your account is verified");
+                    return "success"
+                }else{
+                    return "invalid code"
+                }
             }
-            if (!Token) {
+            if (!savedToken) {
                 if (user) {
-                    if (user.verified == false) { 
-                        return "expired" }
-                   
-                    if(user.verified == true){
+                    if (user.verified == false) {
+                        return "expired"
+                    }
+
+                    if (user.verified == true) {
                         return "success"
                     }
                 }
-                if(!user){
+                if (!user) {
                     return "not found"
                 }
-            }
-            else {
-                return "not found"
-            }
+            } 
 
 
         },

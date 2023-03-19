@@ -12,9 +12,9 @@ const verificationToken = new Schema({
          required: true 
         },
 	createdAt: { 
-        type: Date,
-        default: Date.now,
-        expires: 3600 },
+        type: Date,        
+        expires: 1 ,
+		default: Date.now()},
 });
 
 module.exports = mongoose.model("token", verificationToken);

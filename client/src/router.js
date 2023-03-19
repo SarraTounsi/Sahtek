@@ -55,7 +55,7 @@ export const router = createBrowserRouter([
 
       { path: "profile2", element: <Profile2 /> },
       {
-        path: ":userId/verify/:token",
+        path: "mail-verification/:userId",
         element: <MailVerification />,
       },
       {
