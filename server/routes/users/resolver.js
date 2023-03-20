@@ -12,6 +12,17 @@ const nodemailer = require("nodemailer");
 
 const BASE_URL = "http://localhost:3000";
 
+ //email verification  *OTP*
+ let otp = ''
+ const generateOTP = () => {
+   for (let i = 0; i <= 5; i++) {
+     const randVal = Math.round(Math.random() * 9)
+     otp = otp + randVal
+   }
+   return otp;
+ }
+
+
 const resolvers = {
   Mutation: {
     updateTherapist: async (
@@ -164,36 +175,19 @@ const resolvers = {
           gender,
         });
       }
-      //send email verification  *OTP*
-      let otp = ''
-      const generateOTP = () => {
-        for (let i = 0; i <= 5; i++) {
-          const randVal = Math.round(Math.random() * 9)
-          otp = otp + randVal
-        }
-        return otp;
-      }
 
+      //send email verification  *OTP*
       const OTP = generateOTP()
       console.log(OTP)
       const verificationtoken = await new Token({
         userId: user.id,
         token: bcrypt.hashSync(OTP, 10),
       }).save();
-      const url = `${BASE_URL}/${user.id}/verify`;
+      //const url = `${BASE_URL}/${user.id}/verify`;
       await sendEmail(user.email, "Email Verification",OTP);
       //
 
-
-
-
-      // const token2 = await new Token({
-      //   userId: user.id,
-      //   token: crypto.randomBytes(32).toString("hex"),
-      // }).save();
-      // const url = `${BASE_URL}/${user.id}/verify/${token2.token}`;
-      // await sendEmail(user.email, "Email Verification", String(url));
-      // //
+ 
       await user.save();
       return user;
     },
@@ -204,23 +198,7 @@ const resolvers = {
         throw new ApolloError("Email doesn't exist");
       }
 
-      // resend email verification
-
-      if (user.verified === false) {
-        let token = await Token.findOne({ userId: user.id });
-        if (!token) {
-          const token2 = await new Token({
-            userId: user.id,
-            token: crypto.randomBytes(32).toString("hex"),
-          }).save();
-          const url = `${BASE_URL}/${user.id}/verify/${token2.token}`;
-          await sendEmail(user.email, "Email Verification", String(url));
-        } else if (token) {
-          const url = `${BASE_URL}/${user.id}/verify/${token.token}`;
-          await sendEmail(user.email, "Email Verification", String(url));
-        }
-      }
-      //
+      
 
       if (user && bcrypt.compareSync(password, user.password)) {
         const token = jwt.sign({}, key, {

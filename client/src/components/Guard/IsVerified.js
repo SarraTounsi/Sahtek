@@ -9,7 +9,7 @@ const isVerified = (Component) => {
 
     if (user.verified == false) {
       // If the user is not logged in, redirect to the login page
-      return <Navigate to={`/${user.id}/verify/${token}`} />;
+      return <Navigate to={`/mail-verification/${user.id}`} />;
     }
 
     // If the user is logged in, render the component

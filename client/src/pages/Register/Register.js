@@ -181,9 +181,10 @@ function Register() {
               gender: gender,
             },
           },
-        });
 
-        navigate("/alertCheckMail");
+        }).then((d)=>{ navigate(`/mail-verification/${d.data.register.id}`);})
+
+       
       } catch (error) {
         console.log(error);
         setError("generic", {

@@ -13,7 +13,7 @@ const verificationToken = new Schema({
         },
 	createdAt: { 
         type: Date,        
-        expires: 1 ,
+        expires: 3600 ,
 		default: Date.now()},
 });
 
