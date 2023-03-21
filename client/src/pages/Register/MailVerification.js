@@ -13,8 +13,7 @@ import { useDispatch } from "react-redux";
 
 function MailVerification() {
   const navigate = useNavigate();
-  const [showAlert, setAlert] = useState(false);
-  const [isHiddesn, setisHiddesn] = useState(false);
+ 
   const [validCode, setvalidCode] = useState('');
   const [code, setCode] = useState('');
 
@@ -43,14 +42,14 @@ function MailVerification() {
       });
       console.log(data.resendMailVerification);
       if (data.resendMailVerification === "mail sent") {
-        setisHiddesn(true);
-        setAlert(true);
+       
       } else if (data.resendMailVerification === "user not found") {
       }
-
+      setvalidCode("verify");
     }
     resendMail();
-    navigate("/mail-verification/:userId")
+
+    //navigate(`/mail-verification/${userid.userId}`)
   };
 
 
@@ -101,9 +100,39 @@ function MailVerification() {
     }
   };
 
+  useEffect(() => {
+    try {
+      async function verification() {
+        const { data } = await verifyToken({
+          variables: {
+            userId: userid.userId,
+            verificationTokenInput: {
+              token: '',
+            },
+          },
+        });
+
+        console.log(data.verifyToken);
+        if (data.verifyToken === "success") {
+          setvalidCode("success");
+        } else if (data.verifyToken === "expired") {
+          setvalidCode("expired");
+        } else if (data.verifyToken === "not found") {
+          setvalidCode("not found");
+        } else {
+          setvalidCode("verify");
+
+        }
+      }
+      verification();
+    } catch (error) {
+      console.log(error);
+    }
+  }, [userid]);
+
   return (
     <Fragment>
-      {validCode === '' || validCode === "invalid code" ? (
+      {validCode === 'verify' || validCode === "invalid code" ? (
         <div
           className="section section-image  "
           style={{ height: "100vh", paddingTop: "250px" }}
@@ -151,7 +180,7 @@ function MailVerification() {
                         </Button>
                       </Col>
                     </Row>
-                    
+
                   </Form>
                 </Col>
               </Row>
@@ -224,8 +253,7 @@ function MailVerification() {
                     <Button
                       className="btn-round"
                       onClick={ResendMail}
-                      hidden={isHiddesn}
-                      color="danger"
+                       color="danger"
                     >
                       Resend verification mail
                     </Button>
@@ -233,22 +261,7 @@ function MailVerification() {
 
                   <Row></Row>
                 </Row>
-
-                <Row>
-                  <Col>
-                    {showAlert ? (
-                      <Alert color="info">
-                        <Container>
-                          <span>
-                            We have sent you the verification mail please verify.
-                          </span>
-                        </Container>
-                      </Alert>
-                    ) : (
-                      <p></p>
-                    )}
-                  </Col>
-                </Row>
+ 
               </Container>
             </div>
           </div>

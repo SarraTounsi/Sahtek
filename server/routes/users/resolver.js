@@ -6,21 +6,14 @@ const { key, keyPub } = require("../../keys");
 // const { setCookie } = require('./cookies');
 const Token = require("../../database/models/verificationToken");
 const sendEmail = require("../../utils/sendEmail");
+const {generateOTP} = require("../../utils/OTP");
+
 const crypto = require("crypto");
 const { readFile } = require("../../utils/uploadFile");
 const nodemailer = require("nodemailer");
 
 const BASE_URL = "http://localhost:3000";
 
- //email verification  *OTP*
- let otp = ''
- const generateOTP = () => {
-   for (let i = 0; i <= 5; i++) {
-     const randVal = Math.round(Math.random() * 9)
-     otp = otp + randVal
-   }
-   return otp;
- }
 
 
 const resolvers = {
@@ -177,17 +170,17 @@ const resolvers = {
       }
 
       //send email verification  *OTP*
+       
       const OTP = generateOTP()
       console.log(OTP)
       const verificationtoken = await new Token({
         userId: user.id,
         token: bcrypt.hashSync(OTP, 10),
       }).save();
-      //const url = `${BASE_URL}/${user.id}/verify`;
-      await sendEmail(user.email, "Email Verification",OTP);
+      await sendEmail(user.email, "Email Verification", OTP);
       //
 
- 
+
       await user.save();
       return user;
     },
@@ -198,7 +191,7 @@ const resolvers = {
         throw new ApolloError("Email doesn't exist");
       }
 
-      
+
 
       if (user && bcrypt.compareSync(password, user.password)) {
         const token = jwt.sign({}, key, {
@@ -262,19 +255,21 @@ const resolvers = {
 
       const user = await User.findById(id);
       if (user) {
-        const token2 = new Token({
-          userId: id,
-          token: crypto.randomBytes(32).toString("hex"),
+        //email verification  *OTP*
+       
+        const OTP2 = generateOTP()
+        console.log(OTP2)
+        const verificationtoken2 = await new Token({
+          userId: user.id,
+          token: bcrypt.hashSync(OTP2, 10),
         });
         const tokenexist = await Token.findOne({ userId: id });
         if (tokenexist) {
-          await Token.findOneAndUpdate(id, { userId: id, token: token2.token });
+          await Token.findOneAndUpdate(id, { userId: id, token: verificationtoken2.token });
         } else {
-          token2.save();
+          verificationtoken2.save();
         }
-
-        const url = `${BASE_URL}/${token2.userId}/verify/${token2.token}`;
-        await sendEmail(user.email, "Email Verification", String(url));
+        await sendEmail(user.email, "Email Verification", OTP2);
 
         return "mail sent";
       } else if (!user) {
