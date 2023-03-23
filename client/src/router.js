@@ -1,5 +1,6 @@
 import React from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
+import AdminDashboard from "./Admin/AdminDashboard";
 import App from "./App";
 // import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 // import { rootLoader } from './loaders/rootLoader';
@@ -76,5 +77,9 @@ export const router = createBrowserRouter([
         element: <Navigate to="/" />,
       },
     ],
+  },
+  {
+    path: "admin",
+    element: <AdminDashboard />,
   },
 ]);
