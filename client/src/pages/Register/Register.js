@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { LOGIN_MUTATION, REGISTER_MUTATION } from "../../apis/users";
+import { REGISTER_MUTATION } from "../../apis/users";
 import {
   Alert,
   Button,
@@ -21,15 +21,12 @@ import {
 } from "reactstrap";
 import { Label } from "reactstrap/lib";
 import withGuest from "../../components/Guard/WithGuest";
-import { useDispatch } from "react-redux";
-import { userLoginSuccess } from "../../store/users/user.actions";
 
 function Register() {
   //Date From Select :
   const [day, setDay] = useState("");
   const [month, setMonth] = useState("");
   const [year, setYear] = useState("");
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [passwordType, setPasswordType] = useState("password");
   const togglePassword = () => {
@@ -141,14 +138,19 @@ function Register() {
     initialValues,
     resolver: yupResolver(schema),
   });
-  const [registerUser, { loadingP, errorP, dataP }] =
-    useMutation(REGISTER_MUTATION);
+  const [registerUser] = useMutation(REGISTER_MUTATION);
 
   const submit = handleSubmit(
     async ({ name, role, password, email, gender }) => {
       try {
         let isoDate;
         clearErrors();
+        if (!day || !month || !year) {
+          setError("age", {
+            type: "value",
+            message: "Please Insert your birthday",
+          });
+        }
         if (day && month && year) {
           const dateOfBirth = new Date(year, month - 1, day); // month is 0-based in Date constructor
           const ageDiffMs = Date.now() - dateOfBirth.getTime();
@@ -163,7 +165,6 @@ function Register() {
             isoDate = dateOfBirth.toISOString();
           }
         }
-        console.log(isoDate);
         await registerUser({
           variables: {
             userInput: {
@@ -179,7 +180,12 @@ function Register() {
 
         navigate("/alertCheckMail");
       } catch (error) {
-        setError("generic", { type: "generic", error });
+        console.log(error);
+        setError("generic", {
+          type: "generic",
+          error,
+          message: "Check Your Credentials",
+        });
         console.log(errors);
       }
       // }
@@ -200,11 +206,11 @@ function Register() {
             <Card className="card-register" style={{ maxWidth: "600px" }}>
               <h3 className="title mx-auto">Welcome</h3>
 
-              {/* {errors?.generic && (
+              {errors?.generic && (
                 <Alert color="danger" isOpen={errors?.generic}>
-                  {errors.generic.error.message}
+                  {errors.generic.message}
                 </Alert>
-              )} */}
+              )}
               <form tag={Form} className="register-form" onSubmit={submit}>
                 <Row>
                   <Col>
@@ -302,7 +308,7 @@ function Register() {
                         </Input>
                       </FormGroup>
                     </div>
-                    {errors?.generic && (
+                    {errors?.age && (
                       <Alert color="danger" isOpen={errors?.age}>
                         {errors?.age?.message}
                       </Alert>
@@ -467,6 +473,7 @@ function Register() {
                     {errors.role.message}
                   </Alert>
                 )}
+
                 <Button
                   block
                   className="btn-round"

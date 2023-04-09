@@ -23,9 +23,7 @@ import { useSelector } from "react-redux";
 import { selectUser } from "../../store/users/users.selectors";
 import { useParams } from "react-router-dom";
 import ProfilePosts from "../../components/Posts/profilePosts";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { useForm } from "react-hook-form";
-import * as yup from "yup";
+
 import EditUser from "../../components/Profile/EditUser";
 import Therapist from "../../components/Profile/Therapist";
 import isVerified from "../../components/Guard/IsVerified";
@@ -57,7 +55,7 @@ function Profile2() {
 
 
 
-  
+
 
   const [activeTab, setActiveTab] = useState("1");
 
@@ -172,9 +170,11 @@ function Profile2() {
               <Nav role="tablist" tabs>
                 {(user.role === "Therapist" ||
                   user?.email === data.user?.email) &&
-                data.user.role === "Patient" ? (
+                  data.user.role === "Patient" ? (
                   <NavItem>
                     <NavLink
+                      style={{ cursor: "pointer" }}
+
                       className={activeTab === "2" ? "active" : ""}
                       onClick={() => {
                         toggle("2");
@@ -187,6 +187,7 @@ function Profile2() {
                   <NavItem>
                     <NavLink
                       className={activeTab === "2" ? "active" : ""}
+                      style={{ cursor: "pointer" }}
                       onClick={() => {
                         toggle("2");
                       }}
@@ -200,6 +201,8 @@ function Profile2() {
                 <NavItem>
                   <NavLink
                     className={activeTab === "1" ? "active" : ""}
+                    style={{ cursor: "pointer" }}
+
                     onClick={() => {
                       toggle("1");
                     }}
@@ -291,7 +294,10 @@ function Profile2() {
               </Row>
             </TabPane>
             <TabPane className="text-center" tabId="1" id="following">
-              <ProfilePosts user={user} />
+              {data.user ? (
+                <ProfilePosts user={{ ...data.user, id: user.id }} />
+              ) : (
+                "Loading...")}
             </TabPane>
           </TabContent>
         </Container>

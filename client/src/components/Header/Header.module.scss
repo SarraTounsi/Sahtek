@@ -1,6 +1,6 @@
 :root {
-    --g1: rgb(98, 0, 234);
-    --g2: rgb(236, 64, 122);
+    --g1: #2ba9cd;
+    --g2: #f33816;
 }
 
 @keyframes background-pan {
@@ -13,12 +13,34 @@
     }
 }
 
+@font-face {
+    font-family: "Kalam";
+    src: url("../../assets/fonts/Kalam-Regular.ttf");
+}
+
+@font-face {
+    font-family: "Dancing Script";
+    src: url("../../assets/fonts/DancingScript-VariableFont_wght.ttf");
+}
+
+@font-face {
+    font-family: "Rubik";
+    src: url("../../assets/fonts/Rubik-VariableFont_wght.ttf");
+}
+
+.h {
+    background-image: url("../../assets/img/toa-heftiba-_UIVmIBB3JU-unsplash.jpg");
+    height: 100wh;
+
+}
+
 .animated {
     animation: background-pan 10s linear infinite;
     background: linear-gradient(to right,
             var(--g1),
             var(--g2),
             var(--g1));
+
     background-size: 200%;
     height: 100wh;
     overflow: hidden;
@@ -33,13 +55,17 @@
     opacity: 0;
 }
 
-.animated.toggled>.icon {
+.animated.toggled>.title2 {
     opacity: 1;
 }
 
-.animated.toggled>.tiles>.tile:hover {
-    opacity: 0.1 !important;
+.animated.toggled>.icon {
+    opacity: 0.8;
 }
+
+
+
+
 
 .centered {
     left: 50%;
@@ -67,36 +93,47 @@
 
 .tile:hover:before {
     background-color: rgb(30, 30, 30);
+    opacity: 0.95;
 }
 
 .tile:before {
-    background-color: rgb(15, 15, 15);
+    background-color: #0b1011;
     content: "";
     inset: 0.5px;
     position: absolute;
+    transition: background-color 0.3s;
 }
 
-.title {
+.title,
+.title2 {
     color: white;
     font-family: "Rubik", sans-serif;
     font-size: 6vw;
     margin: 0px;
     pointer-events: none;
-    transition: opacity 1200ms ease;
+    transition: opacity 600ms ease;
     width: 50vw;
     z-index: 3;
 }
 
+.title2 {
+    opacity: 0;
+}
+
 .title>.fancy {
     color: var(--g2);
-    font-family: 'Dancing Script', cursive;
-    font-size: 1.5em;
+    font-family: 'Kalam', cursive;
+    font-size: 1.2em;
     line-height: 0.9em;
+    margin-right: 0.75rem;
 }
 
 .icon {
-    color: rgba(255, 255, 255, 0.15);
-    font-size: 80vmin;
+    background-image: url("../../assets/img/toa-heftiba-_UIVmIBB3JU-unsplash.jpg");
+    height: 100vw;
+    width: 100%;
+    background-size: cover;
+    background-position: center;
     opacity: 0;
     pointer-events: none;
     transition: opacity 1200ms ease;

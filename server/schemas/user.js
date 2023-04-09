@@ -32,7 +32,6 @@ module.exports = gql`
     emergencyContact: EmergencyContact
     medicalConditions: [String]
     medications: [Medication]
-    appointments: [Appointment]
   }
 
   enum Gender {
@@ -76,34 +75,38 @@ module.exports = gql`
     name: String
     email: String!
     password: String!
-    license: String
+    licenses: [License]
     dateOfBirth: String
     profileImage: String
     specialties: [String!]
     description: String
-    availability: String
+    availability: [Availability]
     address: Address
     phoneNumber: String
     education: [String]
-    experience: Int
+    experience: String
     languages: [String]
     fees: Float
     ratings: [Float]
     reviews: [String]
-    appointments: [Appointment]
   }
 
   type Appointment {
-    id: ID!
-    patient: Patient!
-    therapist: Therapist!
-    startTime: String!
-    endTime: String!
-    duration: Int!
+    patient: User
+    therapist: User
+    date: String
+    duration: Int
     notes: String
     status: String
   }
-
+  input AppointmentInput {
+    patient: ID!
+    therapist: ID!
+    date: String
+    duration: Int
+    notes: String
+    status: String
+  }
   type Token {
     value: String!
   }
@@ -127,20 +130,49 @@ module.exports = gql`
     token: String
     user: User
   }
+  type TherapistPayload {
+    user: User
+    rating: Int
+  }
   input TherapistInput {
     id: ID!
-    license: String
+    licenses: [LicenseInput]
     specialties: [String]
     description: String
-    availability: String
+    availability: [AvailabilityInput]
     address: AddressInput
     phoneNumber: String
     education: [String]
-    experience: Int
+    experience: String
     languages: [String]
     fees: Float
     ratings: [Float]
     reviews: [String]
+  }
+  enum LicenseType {
+    Major
+    Minor
+  }
+
+  input LicenseInput {
+    typeL: LicenseType
+    license: String
+    state: String
+  }
+  type License {
+    typeL: LicenseType
+    license: String
+    state: String
+  }
+  input AvailabilityInput {
+    day: String
+    startTime: String
+    endTime: String
+  }
+  type Availability {
+    day: String
+    startTime: String
+    endTime: String
   }
   input AdressInput {
     street: String
@@ -150,8 +182,14 @@ module.exports = gql`
   }
   extend type Query {
     user(ID: ID!): User
+    therapist(ID: ID!): TherapistPayload
+    users: [User]
     checkEmailExists(email: String!): Boolean!
     current(token: String!): User
+    getAppointment(ID: ID!): Appointment
+    getAppointments: [Appointment]
+    getPatientsByTherapist(id: ID!): [User]
+    getAppointmentsByPatient(ID: ID!): [Appointment]
   }
   extend type Mutation {
     register(userInput: UserInput, image: Upload): User
@@ -166,5 +204,13 @@ module.exports = gql`
       newpassword: String!
     ): Boolean
     resendMailVerification(id: ID): String
+    bookAppointment(
+      patient: ID
+      therapist: ID
+      date: String
+      duration: Int
+      notes: String
+      status: String
+    ): Boolean
   }
 `;
