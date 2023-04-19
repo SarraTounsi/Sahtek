@@ -20,6 +20,7 @@ import React, { useContext } from "react";
 // nodejs library that concatenates strings
 import classnames from "classnames";
 // reactstrap components
+import logoSahtek from "../../assets/img/logoSahtek.png";
 import {
   Button,
   Collapse,
@@ -58,18 +59,7 @@ function Navigation() {
 
   React.useEffect(() => {
     const updateNavbarColor = () => {
-      if (
-        document.documentElement.scrollTop > 0 ||
-        document.body.scrollTop > 0
-        // || document.body.style.backgroundColor == '#FFFFFF'
-      ) {
-        setNavbarColor("");
-      } else if (
-        document.documentElement.scrollTop < 0 ||
-        document.body.scrollTop <0
-      ) {
-        setNavbarColor("navbar-transparent");
-      }
+      setNavbarColor("");
     };
 
     window.addEventListener("scroll", updateNavbarColor);
@@ -86,8 +76,14 @@ function Navigation() {
             data-placement="bottom"
             href="/index"
             title="Mental Health Website"
+            style={{ padding: "0" }}
           >
-            Sahtek
+            <img
+              src={logoSahtek}
+              alt="Sahtek"
+              width="120px"
+              style={{ border: "1px solid gray" }}
+            />
           </NavbarBrand>
           <button
             aria-expanded={navbarCollapse}
@@ -107,29 +103,68 @@ function Navigation() {
           isOpen={navbarCollapse}
         >
           <Nav navbar>
-            <NavItem>
-              <NavLink tag={Link} to="/">
-                Home
-              </NavLink>
-            </NavItem>
-            <NavItem>
-              <NavLink tag={Link} to="/">
-                Services
-              </NavLink>
-            </NavItem>
-            <NavItem>
-              <NavLink tag={Link} to="/">
-                Contact us
-              </NavLink>
-            </NavItem>
-            <NavItem>
-              <NavLink tag={Link} to="/">
-                About us
-              </NavLink>
-            </NavItem>
+            {!user && (
+              <>
+                <NavItem>
+                  <NavLink tag={Link} to="/">
+                    Home
+                  </NavLink>
+                </NavItem>
+                <NavItem>
+                  <NavLink tag={Link} to="/">
+                    Services
+                  </NavLink>
+                </NavItem>
+                <NavItem>
+                  <NavLink tag={Link} to="/">
+                    Contact us
+                  </NavLink>
+                </NavItem>
+                <NavItem>
+                  <NavLink tag={Link} to="/">
+                    About us
+                  </NavLink>
+                </NavItem>
+              </>
+            )}
 
             {user && user.verified ? (
               <>
+                {user.role === "Patient" ? (
+                  <>
+                    <NavItem>
+                      <Button
+                        className="btn-round"
+                        color="info"
+                        tag={Link}
+                        to="/shop"
+                      >
+                        Shop
+                      </Button>
+                    </NavItem>
+                    <NavItem>
+                      <Button
+                        className="btn-round"
+                        color="secondary"
+                        tag={Link}
+                        to="/espace-patient"
+                      >
+                        Espace Patient
+                      </Button>
+                    </NavItem>
+                  </>
+                ) : (
+                  <NavItem>
+                    <Button
+                      className="btn-round"
+                      color="secondary"
+                      tag={Link}
+                      to="/espace-therapist"
+                    >
+                      Espace Therapist
+                    </Button>
+                  </NavItem>
+                )}
                 <NavItem>
                   <Button
                     className="btn-round"

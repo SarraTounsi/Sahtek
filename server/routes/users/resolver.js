@@ -275,10 +275,17 @@ const resolvers = {
 
       const existingAppointment = await Appointment.findOne({
         date: date,
-        therapist: therapist,
-        date: { $lte: new Date(date).getTime() + 60 * 60 * 1000 },
+        therapist: d,
+        patient:p
+        // date: { $lte: new Date(date).getTime() + 60 * 60 * 1000 },
       });
-      if (existingAppointment) {
+      const patientaleardyhaveone = await Appointment.findOne({
+        date: date,
+        patient:p
+        // date: { $lte: new Date(date).getTime() + 60 * 60 * 1000 },
+      });
+      console.log(existingAppointment);
+      if (existingAppointment || patientaleardyhaveone) {
         throw new Error("Time slot not available");
       }
 
@@ -292,6 +299,34 @@ const resolvers = {
       });
       await appointment.save();
 
+      return true;
+    },
+
+    AcceptAppointment: async (_, { idAppointment }) => {
+      const appointment = await Appointment.findById(idAppointment);
+      
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
+        auth: {
+          user: "sahtek2023@gmail.com",
+          pass: "qrowlwkuavbwonwo",
+        },
+      });
+
+      const userPatient = await User.findById(appointment.patient);
+      const userTherapist = await User.findById(appointment.therapist);
+      appointment.status = "Confirmed";
+      await appointment.save();
+      const mailOptions = {
+        from: "sahtek2023@gmail.com",
+        to: userPatient.email,
+        subject: "Appointment Accepted",
+        text: `Your appointment is confirmed by Dr  ${userTherapist.name} it will be at ${appointment.date} Welcome ${userPatient.name}`,
+      };
+      await transporter.sendMail(mailOptions);
       return true;
     },
 
@@ -331,7 +366,14 @@ const resolvers = {
     async user(_, { ID }) {
       return await User.findById(ID);
     },
-
+    async getTherapistsByPatient(_, { ID }) {
+      let listTherapist = [];
+      const therapistsId = await Appointment.find({ patient: ID });
+      for (let i = 0; i < therapistsId.length; i++) {
+        listTherapist.push(await User.findById(therapistsId[i].therapist));
+      }
+      return listTherapist;
+    },
     async therapist(_, { ID }) {
       const user = await User.findById(ID);
       if (user.therapist) {
@@ -351,13 +393,18 @@ const resolvers = {
     },
     async getAppointmentsByPatient(_, { ID }) {
       let appointments = await Appointment.find({ patient: ID });
-      //filter this weeks appointments
-      appointments = appointments.filter((appointment) => {
-        const date = new Date(appointment.date);
-        console.log(date);
-        return moment(date).isSame(moment(), "week");
-      });
-      return appointments;
+
+      return appointments
+        .filter((appointment) => {
+          const date = new Date(appointment.date);
+          return date > new Date();
+        })
+        .sort((a, b) => {
+          return a.date - b.date;
+        });
+    },
+    async getAppointmentsByTherapist(_, { therapist }) {
+      return await Appointment.find({ therapist });
     },
     checkEmailExists: async (_, { email }, { models }) => {
       const user = await models.User.findOne({ where: { email } });
@@ -388,14 +435,7 @@ const resolvers = {
       return await User.find({ _id: { $in: list } });
     },
   },
-  User: {
-    therapist: async (parent) => {
-      return await User.findById(parent.therapist);
-    },
-    patient: async (parent) => {
-      return await User.findById(parent.patient);
-    },
-  },
+
   Appointment: {
     async patient(appointment) {
       return await User.findById(appointment.patient);

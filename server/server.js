@@ -1,13 +1,10 @@
 const express = require('express');
 // const cookie = require('cookie-parser');
-const { router, map } = require('./routes');
 const { graphqlUploadExpress } = require('graphql-upload');
 const app = express();
 const { ApolloServer } = require('apollo-server-express');
 var cors = require('cors')
-const server = require('http').createServer(app);
 const socketio = require('socket.io');
-const mongoose = require('mongoose');
 
 // app.use(cookie());
 app.use(express.json());
@@ -56,7 +53,6 @@ const startServer = async () => {
       socket.broadcast.emit("hanged-up");
     });
     socket.on('hang-up', (data) => {
-      console.log("i hanged up")
       socket.broadcast.emit('hanged-up');
     });
     socket.on('toggle-video', (data) => {
@@ -77,7 +73,6 @@ const startServer = async () => {
     });
     socket.on('joinroom', (data) => {
       const { roomId, emailId } = data;
-      console.log("joinroom", roomId, emailId)
       emailToSocketMapping.set(emailId, socket.id);
       socketToEmailMapping.set(socket.id, emailId);
       socket.join(roomId);
