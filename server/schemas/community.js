@@ -8,6 +8,7 @@ type Community {
   members: [User]
   creator: User
   posts: [Post]
+  color: String
  
    
 }

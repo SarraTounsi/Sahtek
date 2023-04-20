@@ -34,7 +34,7 @@ const resolvers = {
       return await Community.find().sort({ $natural: -1 })
     },
     async findCommunityByUser(_, { id }) {
-      return await Community.find({ members: ObjectId(id) });
+      return await Community.find({ members: ObjectId(id) }).sort({ $natural: -1 })
     },
 
 
@@ -146,12 +146,19 @@ const resolvers = {
 
 
     async createCommunity(_, { name, description, creator }) {
+      function generateRandomColor() {
+        const color = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+        return color;
+      }
+      
+     
       const createdCommunity = new Community({
         name: name,
         description: description,
         createdAt: new Date(),
         members: [],
         creator: creator,
+        color: generateRandomColor()
 
 
       });

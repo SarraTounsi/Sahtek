@@ -380,7 +380,7 @@ function ForumHomepage() {
                                             <div className={styles.cardSide}>
 
                                                 {p.isLiked ?
-                                                    <div className={styles.Icon} onClick={() => { removelike(p.id) }}>
+                                                    <div className={styles.Icon} onClick={() => { removelike(p.id); console.log(p?.community?.color ) }}>
                                                         <TbArrowBigUpFilled className={styles.upvoteIcon} />
 
                                                     </div>
@@ -399,8 +399,9 @@ function ForumHomepage() {
                                             <div className={styles.cardContent}>
                                                 <div className={styles.cardHeader}>
                                                     <div className={styles.row}>
-                                                        <label className="label label-primary mr-1">{p?.community?.name}</label>
-
+                                                    <Link to={`/community/${p?.community?.id}`}  > 
+                                                    <label   className="label  mr-1"  style={{background: p?.community?.color , cursor: "pointer"}}>{p?.community?.name}</label>
+                                                    </Link>
 
 
 

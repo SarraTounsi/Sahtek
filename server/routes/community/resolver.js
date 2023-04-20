@@ -15,11 +15,23 @@ const resolvers = {
 
     Mutation: {
         async createCommunity(_, { name, description }) {
+            function generateRandomColor() {
+                const letters = '0123456789ABCDEF';
+                let color = '#';
+                for (let i = 0; i < 6; i++) {
+                  color += letters[Math.floor(Math.random() * 16)];
+                }
+                 
+                return color;
+              }
+             
             const createdCommunity = new Community({
                 name: name,
                 description: description,
                 createdAt: new Date(),
                 members: [],
+                color: generateRandomColor()
+             
 
 
             });
