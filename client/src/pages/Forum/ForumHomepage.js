@@ -460,18 +460,17 @@ function ForumHomepage() {
 
         <div className={styles.containerFluid} >
 
- 
-<Row className="d-flex justify-content-center align-items-center " style={{ marginTop: "21px" }}>
 
-<Col lg="6" md="6">
-    <FormGroup>
-        <Input placeholder="Search" type="text"
-            onChange={(a) => setPostSearchQuery(a.target.value)} />
-    </FormGroup>
-</Col>
-</Row> 
-          
             <Col lg="6" md="6">
+                <div className={styles.add_post_container}  >
+                    <div className={styles.row}>
+
+                        <Input placeholder="Search" type="text"
+                            onChange={(a) => setPostSearchQuery(a.target.value)} />
+
+                    </div>
+                </div>
+               
 
 
                 <div className={styles.add_post_container}  >
