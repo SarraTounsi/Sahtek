@@ -21,7 +21,7 @@ import ProfilePageHeader from "../../components/Header/ProfilePageHeader";
 import withAuth from "../../components/Guard/WithAuth";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../store/users/users.selectors";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import ProfilePosts from "../../components/Posts/profilePosts";
 
 import EditUser from "../../components/Profile/EditUser";
@@ -51,11 +51,6 @@ function Profile2() {
     },
     { notifyOnNetworkStatusChange: true }
   );
-
-
-
-
-
 
   const [activeTab, setActiveTab] = useState("1");
 
@@ -170,11 +165,10 @@ function Profile2() {
               <Nav role="tablist" tabs>
                 {(user.role === "Therapist" ||
                   user?.email === data.user?.email) &&
-                  data.user.role === "Patient" ? (
+                data.user.role === "Patient" ? (
                   <NavItem>
                     <NavLink
                       style={{ cursor: "pointer" }}
-
                       className={activeTab === "2" ? "active" : ""}
                       onClick={() => {
                         toggle("2");
@@ -202,7 +196,6 @@ function Profile2() {
                   <NavLink
                     className={activeTab === "1" ? "active" : ""}
                     style={{ cursor: "pointer" }}
-
                     onClick={() => {
                       toggle("1");
                     }}
@@ -280,7 +273,10 @@ function Profile2() {
                             No saved medical conditions :(
                           </h3>
                           <Button className="btn-round" color="warning">
-                            Take test
+                            <Link to="/chat" style={{ color: "white" }}>
+                              {" "}
+                              Take test
+                            </Link>
                           </Button>
                         </div>
                       )
@@ -297,7 +293,8 @@ function Profile2() {
               {data.user ? (
                 <ProfilePosts user={{ ...data.user, id: user.id }} />
               ) : (
-                "Loading...")}
+                "Loading..."
+              )}
             </TabPane>
           </TabContent>
         </Container>
