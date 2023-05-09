@@ -91,11 +91,14 @@ const Appointments = () => {
     const handleButtonClick = (idAppointment) => {
       try {
         const { data } = AcceptAppointment({ variables: { idAppointment } });
-        navigate("/appforTherapist")
-      } catch (error) {
+        window.location.reload()
+            } catch (error) {
         alert("!!!");
       }
     };
+    const handleButtonClick2=(idAppointment)=>{
+      navigate(`/videoCall/${idAppointment}`)
+    }
 console.log(data);
    
     // const submit = handleSubmit(async ({ id }) => {
@@ -152,7 +155,7 @@ console.log(data);
       <MDBCardHeader>Appointment</MDBCardHeader>
       <MDBCardBody>
         <MDBCardTitle>Date: {new Date(item.date*1).getDate()}/{new Date(item.date*1).getMonth()}/{new Date(item.date * 1).getFullYear() }   {new Date(item.date * 1).getHours() }:00 HH </MDBCardTitle>
-       {datauser.users.map(ite =>{return((ite.id === item.patient)&& <MDBCardText>Patient Name: {(ite.name)}</MDBCardText>)})}  
+        <MDBCardText>Patient Name: {(item.patient.name)}</MDBCardText>
       
       </MDBCardBody>
       <MDBCardFooter className='text-muted'>Status : {item.status === 'Confirmed' ? (
@@ -163,9 +166,15 @@ console.log(data);
       <span className="badge badge-secondary">Scheduled</span>):
       item.status==='Cancelled'?(
       <span className="badge badge-danger">Cancelled</span>):<span></span>}</MDBCardFooter>
-       <div style={{paddingLeft:'70%'}}> 
-        <button type="button" class="btn btn-success" onClick={() =>
-        handleButtonClick(item.id)} disabled={item.status==='Confirmed'}  >Confirme</button>
+       <div style={{paddingLeft:'70%'}}>
+        {
+            item.status==='Scheduled'?(
+            <button type="button" class="btn btn-success" onClick={() =>handleButtonClick(item.id)} >Confirme</button>
+        ):(<div></div>)}
+      </div>
+      <div style={{paddingLeft:'70%'}}> 
+        <button type="button" class="btn btn-primary" 
+        onClick={() => handleButtonClick2(item.id)} disabled={item.status==='Completed'}  >Join the Call</button>
       </div>
     </MDBCard> ))}
    

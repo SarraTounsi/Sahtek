@@ -86,6 +86,7 @@ const CommunityPage = React.lazy(() =>
 
 const Shop = React.lazy(() => import("./pages/Shop/Shop"));
 const Cart = React.lazy(() => import("./pages/Shop/Cart"));
+const searchByImage = React.lazy(() => import("./pages/Shop/HomePage/searchByImage"));
 
 export const router = createBrowserRouter([
   {
@@ -100,6 +101,10 @@ export const router = createBrowserRouter([
       {
         path: "table",
         element: <TimeTable />,
+      },
+      {
+        path: "searchbyimage/:dataSprod",
+        element: <searchByImage />,
       },
       {
         path: "appointments",

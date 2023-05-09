@@ -37,17 +37,20 @@ function runPythonScript(arg1, arg2) {
 }
 const resolvers = {
   Query: {
-    compareImages: async (_, { image1_path, image2_path }) => {
-     const p1= await User.findById(image1_path)
-     const p2= await User.findById(image2_path)
-    
-     try {
-      const floatValue = await runPythonScript(p1.profileImage, p2.profileImage);
-      return floatValue;
-    } catch (err) {
-      console.error(err);
-      return null; // or throw a custom error
+    compareImages: async (_, { image1_path }) => {
+     const p= await Product.find()
+    const matchingProducts=[]
+    for(const product of p){
+   try {
+    const floatValue = await runPythonScript(product.image, image1_path);
+    if (floatValue>0.55){
+      matchingProducts.push(product)
     }
+  } catch (err) {
+    console.error(err);
+    // or throw a custom error
+  }}
+  return matchingProducts
       // image1=p1.image
       // image2=p2.image
 

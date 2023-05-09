@@ -11,6 +11,7 @@ import { selectCountAll } from '../../../store/shop/cartSlice';
 import {NavLink} from 'react-router-dom';
 import Nav from 'react-bootstrap/Nav';
 import {Link} from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 
 import {
   ADD_TO_WISHLIST,
@@ -23,6 +24,16 @@ import {
 import Wishlist from "../../../components/Shop/WishList";
 import Slideshow from "../../../components/Shop/SlideShow";
 import { increment } from "../../../store/shop/cartSlice";
+import {
+  Button,
+  Col,
+  Form,
+  FormGroup,
+  Input,
+  Label,
+  
+  Row,
+} from "reactstrap";
 
 const GET_PRODUCTS = gql`
   query GetAllProducts {
@@ -37,56 +48,91 @@ const GET_PRODUCTS = gql`
     }
   }
 `;
+export const GET_SIMILAR_PRODUCTS=gql`
+query compareImages($image1_path: String){
+  compareImages(image1_path:$image1_path){
+      id
+      category
+      description
+      name
+      price
+      stock
+      image}
+}`
 const GET_CATEGORIES = gql`
   query Query {
     getCategories
   }
 `;
 const HomeShop = () => {
+  const navigate = useNavigate();
+  
+  
+  const [affichage, setAffichage] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cart, setCart] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+
   const [maxPrice, setMaxPrice] = useState(500);
   const dispatch = useDispatch();
   const products = useSelector(selectProducts);
   const wishlist = useSelector(selectWishlist);
   const [showWishlist, setShowWishlist] = useState(false);
   const CartNumber = useSelector(selectCountAll);
+  const { loading:loo, error:err, data:dataSprod } = useQuery(GET_SIMILAR_PRODUCTS,{
+    variables: { image1_path:imageUrl},
+  },);
 
   const handleWishlistClick = () => {
     setShowWishlist(!showWishlist);
   };
+  
   const { loading, error, data } = useQuery(GET_PRODUCTS);
+ 
+  const [dataSproducts, setDataSproducts] = useState(data)
+
+
   const [categories, setCategories] = useState([]);
   const {
     loading: loadingCategories,
     error: errorCategories,
     data: dataCategories,
   } = useQuery(GET_CATEGORIES);
-
+  
+  function handleButtonClick() {
+    setAffichage(!affichage)
+    console.log(dataSprod.compareImages) 
+    setDataSproducts(dataSprod.compareImages) 
+ }
   useEffect(() => {
+    if (dataSprod){
+      dispatch(setProducts(dataSproducts.compareImages))}
     if (data) {
       dispatch(setProducts(data.getAllProducts));
     }
     if (dataCategories) {
       setCategories(dataCategories.getCategories);
     }
+   
   }, [data, dispatch, dataCategories, categories]);
-
+ 
   if (loading) {
     return <p>Loading...</p>;
   }
 
-  if (error) {
+
+  if (error,err) {
     return <p>Error: {error.message}</p>;
   }
+  
   const filteredProducts = products.filter(
     (product) =>
       product?.name?.toLowerCase().includes(searchQuery.toLowerCase()) &&
       (selectedCategories.length === 0 ||
         selectedCategories.includes(product.category)) &&
-      (maxPrice === "" || product.price < parseInt(maxPrice))
+      (maxPrice === "" || product.price < parseInt(maxPrice))&&(handleButtonClick)
   );
   function addToCart(product) {
     dispatch (increment(product));
@@ -117,6 +163,11 @@ const HomeShop = () => {
       );
     }
   };
+  const handleInputChange = (event) => {
+    setImageUrl(event.target.value);
+  };
+ 
+
   
   
   const handleChoosePriceeChange = (event) => {
@@ -128,6 +179,7 @@ const HomeShop = () => {
   };
   return (
     <>
+    
       <Slideshow />
       <div className="d-flex justify-content-end">
         <div className="m-2">
@@ -174,31 +226,66 @@ const HomeShop = () => {
           maxPrice={maxPrice}
         />
       )}
-      <div className="row mt-4">
-        {showWishlist && <Wishlist />}
+         <Row>
+        <Col>
+          <Input
+          value={imageUrl} onChange={handleInputChange} placeholder="enter the url here"
+            type="text"
+          />
+        </Col>
+        <Col>
+          <Button onClick={() =>
+        handleButtonClick()}> Search By Image </Button>
+        </Col></Row>
+        {/* <input type='text' value={imageUrl} onChange={handleInputChange} placeholder="enter the url here"></input>   
+        <button type="submit" className="btn btn-outline-info" onClick={() =>
+        handleButtonClick()}>search by image</button> */}
 
-        {filteredProducts?.map((product, index) => (
-          <div key={product.id} className="col-lg-3 col-md-4 col-sm-6 mb-3">
-            <CardProduct
-              key={index}
-              product={product}
-              addToCart={addToCart}
-              isWishlist={isWishlist(product.id)}
-              onToggleWishlist={onToggleWishlist}
-            />
-          </div>
-        ))}
-        {filteredProducts.length === 0 && (
-          <div className="  w-100 text-center">
-            <img
-              src="https://kalpamritmarketing.com/design_img/no-product-found.jpg"
-              alt="no found"
-              srcset=""
-              style={{ width: "100%" }}
-            />
-          </div>
-        )}
-      </div>
+
+       {affichage ?(
+         <div className="row mt-4">
+         {showWishlist && <Wishlist />}
+ {/* {handleButtonClick?(setDataSproducts(dataSprod)):(null)} */}
+         {filteredProducts?.map((product, index) => (
+           <div key={product.id} className="col-lg-3 col-md-4 col-sm-6 mb-3">
+             <CardProduct
+               key={index}
+               product={product}
+               addToCart={addToCart}
+               isWishlist={isWishlist(product.id)}
+               onToggleWishlist={onToggleWishlist}
+             />
+           </div>
+         ))}
+         {filteredProducts.length === 0 && (
+           <div className="  w-100 text-center">
+             <img
+               src="https://kalpamritmarketing.com/design_img/no-product-found.jpg"
+               alt="no found"
+               srcset=""
+               style={{ width: "100%" }}
+             />
+           </div>
+         )}
+       </div>
+       ):loo ?(      
+ <p>loading</p>):(
+  <div>
+  {dataSprod?.compareImages?.map((item)=>
+        <div class="card" style={{width:" 18rem"}}>
+        <img class="card-img-top" src={item.image} alt="Card image cap"></img>
+        <div class="card-body">
+          <h5 class="card-title">{item.name}</h5>
+          <p class="card-text">{item.description} </p>
+          <a href="#" class="btn btn-primary">add To Card</a>
+        </div>
+      </div>)}</div>
+ )
+   
+  }
+      
+       
+     
     </>
   );
 };
