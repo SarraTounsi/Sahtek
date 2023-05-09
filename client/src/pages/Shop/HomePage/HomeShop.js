@@ -282,12 +282,13 @@ const HomeShop = () => {
           slidesToSlide={3}
           swipeable
         >
-          {JSON.parse(dataAmazon?.getAmazonProducts).map((product, index) => (
-            <a href={product.productUrl} target="_blank">
-              {" "}
-              <AmazonProd className={styles.amz} product={product} />
-            </a>
-          ))}
+          {JSON &&
+            JSON.parse(dataAmazon?.getAmazonProducts).map((product, index) => (
+              <a href={product.productUrl} target="_blank">
+                {" "}
+                <AmazonProd className={styles.amz} product={product} />
+              </a>
+            ))}
         </Carousel>
       </div>
     </>

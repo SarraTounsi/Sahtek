@@ -55,7 +55,7 @@ function CardProduct({ product, isWishlist, onToggleWishlist, addToCart }) {
         <CardText>{product.description}</CardText>
         <Row>
           <Col xs={6} className="price">
-            ${product.price}
+            {product.price} DT
           </Col>
           <Col xs={6} className="text-right">
             <FaShoppingCart
