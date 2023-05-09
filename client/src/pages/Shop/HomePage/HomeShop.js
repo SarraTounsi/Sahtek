@@ -12,6 +12,7 @@ import { NavLink } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
+import { Button, Col, Form, FormGroup, Input, Label, Row } from "reactstrap";
 import {
   addToWishlist,
   emptyWishlist,
@@ -49,7 +50,23 @@ const GET_AMAZON_PRODUCTS = gql`
     getAmazonProducts
   }
 `;
+export const GET_SIMILAR_PRODUCTS = gql`
+  query compareImages($image1_path: String) {
+    compareImages(image1_path: $image1_path) {
+      id
+      category
+      description
+      name
+      price
+      stock
+      image
+    }
+  }
+`;
 const HomeShop = () => {
+  const [affichage, setAffichage] = useState(true);
+  const [imageUrl, setImageUrl] = useState("");
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -63,6 +80,13 @@ const HomeShop = () => {
   const handleWishlistClick = () => {
     setShowWishlist(!showWishlist);
   };
+  const {
+    loading: loo,
+    error: err,
+    data: dataSprod,
+  } = useQuery(GET_SIMILAR_PRODUCTS, {
+    variables: { image1_path: imageUrl },
+  });
   const { loading, error, data } = useQuery(GET_PRODUCTS);
   const {
     loading: loadingAmazon,
@@ -75,7 +99,10 @@ const HomeShop = () => {
     error: errorCategories,
     data: dataCategories,
   } = useQuery(GET_CATEGORIES);
-
+  function handleButtonClick() {
+    setAffichage(!affichage);
+    console.log(dataSprod.compareImages);
+  }
   useEffect(() => {
     if (data) {
       dispatch(setProducts(data.getAllProducts));
@@ -97,8 +124,8 @@ const HomeShop = () => {
     );
   }
 
-  if (error) {
-    return <p>Error: {error.message}</p>;
+  if ((error, err)) {
+    return <p>Error: </p>;
   }
   const filteredProducts = products.filter(
     (product) =>
@@ -126,6 +153,9 @@ const HomeShop = () => {
   const clearWishlist = () => {
     dispatch(emptyWishlist());
   };
+  const handleInputChange = (event) => {
+    setImageUrl(event.target.value);
+  };
   const handleCheckboxChange = (event) => {
     const { value, checked } = event.target;
     if (checked) {
@@ -151,6 +181,17 @@ const HomeShop = () => {
     <>
       <Slideshow />
       <div className="d-flex justify-content-end">
+        <Col className="m-2">
+          <Input
+            value={imageUrl}
+            onChange={handleInputChange}
+            placeholder="enter the url here"
+            type="text"
+          />
+        </Col>
+        <Col className="m-2">
+          <Button onClick={() => handleButtonClick()}> Search By Image </Button>
+        </Col>
         <div className="m-2">
           {" "}
           <button
@@ -166,20 +207,20 @@ const HomeShop = () => {
           {" "}
           <button
             onClick={clearWishlist}
-            className="btn btn-outline-info"
+            className="btn btn-outline-primary mr-1"
             style={{ textAlign: "right" }}
           >
             Clear Wishlist <AiOutlineClear />
           </button>
           <button
             onClick={handleWishlistClick}
-            className="btn btn-outline-info"
+            className="btn btn-outline-primary  mr-1"
             style={{ textAlign: "right" }}
           >
             Wishlist
           </button>
           <Link
-            className="btn btn-outline-info"
+            className="btn btn-outline-primary"
             style={{ textAlign: "right" }}
             as={NavLink}
             to="/cart"
@@ -200,97 +241,133 @@ const HomeShop = () => {
           maxPrice={maxPrice}
         />
       )}
-      <div className="row mt-4">
-        {showWishlist && <Wishlist />}
+      {/* <Row>
+        <Col>
+          <Input
+          value={imageUrl} onChange={handleInputChange} placeholder="enter the url here"
+            type="text"
+          />
+        </Col>
+        <Col>
+          <Button onClick={() =>
+        handleButtonClick()}> Search By Image </Button>
+        </Col></Row> */}
+      {affichage ? (
+        <div className="row mt-4">
+          {showWishlist && <Wishlist />}
 
-        {filteredProducts?.map((product, index) => (
-          <div key={product.id} className="col-lg-3 col-md-4 col-sm-6 mb-3">
-            <CardProduct
-              key={index}
-              product={product}
-              addToCart={addToCart}
-              isWishlist={isWishlist(product.id)}
-              onToggleWishlist={onToggleWishlist}
-            />
+          {filteredProducts?.map((product, index) => (
+            <div key={product.id} className="col-lg-3 col-md-4 col-sm-6 mb-3">
+              <CardProduct
+                key={index}
+                product={product}
+                addToCart={addToCart}
+                isWishlist={isWishlist(product.id)}
+                onToggleWishlist={onToggleWishlist}
+              />
+            </div>
+          ))}
+          {filteredProducts.length === 0 && (
+            <div className="  w-100 text-center">
+              <img
+                src="https://kalpamritmarketing.com/design_img/no-product-found.jpg"
+                alt="no found"
+                srcset=""
+                style={{ width: "100%" }}
+              />
+            </div>
+          )}
+          <div className="border-top mb-5" style={{ width: "100vw" }}>
+            <h4>See also:</h4>
           </div>
-        ))}
-        {filteredProducts.length === 0 && (
-          <div className="  w-100 text-center">
-            <img
-              src="https://kalpamritmarketing.com/design_img/no-product-found.jpg"
-              alt="no found"
-              srcset=""
-              style={{ width: "100%" }}
-            />
-          </div>
-        )}
-        <div className="border-top mb-5" style={{ width: "100vw" }}>
-          <h4>See also:</h4>
+          {loadingAmazon && <Spinner />}
+
+          <Carousel
+            additionalTransfrom={0}
+            arrows
+            autoPlaySpeed={3000}
+            centerMode={false}
+            className=""
+            containerClass="container"
+            dotListClass=""
+            draggable
+            focusOnSelect={false}
+            infinite={false}
+            itemClass=""
+            keyBoardControl
+            minimumTouchDrag={80}
+            pauseOnHover
+            renderArrowsWhenDisabled={false}
+            renderButtonGroupOutside={false}
+            renderDotsOutside={false}
+            responsive={{
+              desktop: {
+                breakpoint: {
+                  max: 3000,
+                  min: 1024,
+                },
+                items: 3,
+                partialVisibilityGutter: 40,
+              },
+              mobile: {
+                breakpoint: {
+                  max: 464,
+                  min: 0,
+                },
+                items: 1,
+                partialVisibilityGutter: 30,
+              },
+              tablet: {
+                breakpoint: {
+                  max: 1024,
+                  min: 464,
+                },
+                items: 2,
+                partialVisibilityGutter: 30,
+              },
+            }}
+            rewind={false}
+            rewindWithAnimation={false}
+            rtl={false}
+            shouldResetAutoplay
+            showDots={false}
+            sliderClass=""
+            slidesToSlide={3}
+            swipeable
+          >
+            {JSON &&
+              JSON.parse(dataAmazon?.getAmazonProducts).map(
+                (product, index) => (
+                  <a href={product.productUrl} target="_blank">
+                    {" "}
+                    <AmazonProd className={styles.amz} product={product} />
+                  </a>
+                )
+              )}
+          </Carousel>
         </div>
-        {loadingAmazon && <Spinner />}
-
-        <Carousel
-          additionalTransfrom={0}
-          arrows
-          autoPlaySpeed={3000}
-          centerMode={false}
-          className=""
-          containerClass="container"
-          dotListClass=""
-          draggable
-          focusOnSelect={false}
-          infinite={false}
-          itemClass=""
-          keyBoardControl
-          minimumTouchDrag={80}
-          pauseOnHover
-          renderArrowsWhenDisabled={false}
-          renderButtonGroupOutside={false}
-          renderDotsOutside={false}
-          responsive={{
-            desktop: {
-              breakpoint: {
-                max: 3000,
-                min: 1024,
-              },
-              items: 3,
-              partialVisibilityGutter: 40,
-            },
-            mobile: {
-              breakpoint: {
-                max: 464,
-                min: 0,
-              },
-              items: 1,
-              partialVisibilityGutter: 30,
-            },
-            tablet: {
-              breakpoint: {
-                max: 1024,
-                min: 464,
-              },
-              items: 2,
-              partialVisibilityGutter: 30,
-            },
-          }}
-          rewind={false}
-          rewindWithAnimation={false}
-          rtl={false}
-          shouldResetAutoplay
-          showDots={false}
-          sliderClass=""
-          slidesToSlide={3}
-          swipeable
-        >
-          {JSON &&
-            JSON.parse(dataAmazon?.getAmazonProducts).map((product, index) => (
-              <a href={product.productUrl} target="_blank">
-                {" "}
-                <AmazonProd className={styles.amz} product={product} />
-              </a>
-            ))}
-        </Carousel>
-      </div>
+      ) : loo ? (
+        <p>loading</p>
+      ) : (
+        <div>
+          {dataSprod?.compareImages?.map((item) => (
+            <div class="card" style={{ width: " 18rem" }}>
+              <img
+                class="card-img-top"
+                src={item.image}
+                alt="Card image cap"
+              ></img>
+              <div class="card-body">
+                <h5 class="card-title">{item.name}</h5>
+                <p class="card-text">{item.description} </p>
+                <a href="#" class="btn btn-primary">
+                  add To Card
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </>
   );
 };

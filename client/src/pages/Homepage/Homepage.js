@@ -33,14 +33,8 @@ function Homepage() {
                   committed to helping you prioritize it.
                 </h5>
                 <br />
-                <Button
-                  className="btn-round"
-                  color="info"
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  See Details
-                </Button>
+
+                <hr />
               </Col>
             </Row>
             <br />
@@ -58,9 +52,6 @@ function Homepage() {
                       and mental health experts through our easy-to-use online
                       consultation platform.
                     </p>
-                    <Button className="btn-link" color="info" href="#pablo">
-                      See more
-                    </Button>
                   </div>
                 </div>
               </Col>
@@ -76,9 +67,6 @@ function Homepage() {
                       experiences and share your own story in our safe and
                       supportive community forum.
                     </p>
-                    <Button className="btn-link" color="info" href="#pablo">
-                      See more
-                    </Button>
                   </div>
                 </div>
               </Col>
@@ -94,9 +82,6 @@ function Homepage() {
                       products, including books, journals, and self-care tools
                       to help you prioritize your wellbeing.
                     </p>
-                    <Button className="btn-link" color="info" href="#pablo">
-                      See more
-                    </Button>
                   </div>
                 </div>
               </Col>
@@ -112,9 +97,9 @@ function Homepage() {
                       provide personalized mental health recommendations and
                       support based on your unique needs and concerns.
                     </p>
-                    <Button className="btn-link" color="info" href="#pablo">
+                    {/* <Button className="btn-link" color="info" href="#pablo">
                       See more
-                    </Button>
+                    </Button> */}
                   </div>
                 </div>
               </Col>
@@ -291,6 +276,108 @@ function Homepage() {
                   <CardBody>
                     <a href="#pablo" onClick={(e) => e.preventDefault()}>
                       <div className="author">
+                        <CardTitle tag="h4">Hajri Oumayma</CardTitle>
+                        <h6 className="card-category">Developer</h6>
+                      </div>
+                    </a>
+                    <p className="card-description text-center">
+                      A talented and dedicated React developer, committed to
+                      leveraging technology to solve complex problems and create
+                      innovative solutions.
+                    </p>
+                  </CardBody>
+                  <CardFooter className="text-center">
+                    <Button
+                      className="btn-just-icon btn-neutral"
+                      color="link"
+                      href="#pablo"
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      <i className="fa fa-twitter" />
+                    </Button>
+                    <Button
+                      className="btn-just-icon btn-neutral ml-1"
+                      color="link"
+                      href="#pablo"
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      <i className="fa fa-google-plus" />
+                    </Button>
+                    <Button
+                      className="btn-just-icon btn-neutral ml-1"
+                      color="link"
+                      href="#pablo"
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      <i className="fa fa-linkedin" />
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </Col>
+              <Col md="3">
+                <Card className="card-profile card-plain">
+                  <div className="card-avatar">
+                    <a href="#pablo" onClick={(e) => e.preventDefault()}>
+                      <img
+                        alt="..."
+                        src={require("../../assets/img/faces/clem-onojeghuo-2.jpg")}
+                      />
+                    </a>
+                  </div>
+                  <CardBody>
+                    <a href="#pablo" onClick={(e) => e.preventDefault()}>
+                      <div className="author">
+                        <CardTitle tag="h4">Chibani Adam</CardTitle>
+                        <h6 className="card-category">Developer</h6>
+                      </div>
+                    </a>
+                    <p className="card-description text-center">
+                      Skilled software developer with expertise in various
+                      programming languages, dedicated to developing efficient
+                      and effective solutions that meet client needs.
+                    </p>
+                  </CardBody>
+                  <CardFooter className="text-center">
+                    <Button
+                      className="btn-just-icon btn-neutral"
+                      color="link"
+                      href="#pablo"
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      <i className="fa fa-twitter" />
+                    </Button>
+                    <Button
+                      className="btn-just-icon btn-neutral ml-1"
+                      color="link"
+                      href="#pablo"
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      <i className="fa fa-google-plus" />
+                    </Button>
+                    <Button
+                      className="btn-just-icon btn-neutral ml-1"
+                      color="link"
+                      href="#pablo"
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      <i className="fa fa-linkedin" />
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </Col>
+              <Col md="3">
+                <Card className="card-profile card-plain">
+                  <div className="card-avatar">
+                    <a href="#pablo" onClick={(e) => e.preventDefault()}>
+                      <img
+                        alt="..."
+                        src={require("../../assets/img/faces/joe-gardner-2.jpg")}
+                      />
+                    </a>
+                  </div>
+                  <CardBody>
+                    <a href="#pablo" onClick={(e) => e.preventDefault()}>
+                      <div className="author">
                         <CardTitle tag="h4">Tounsi Sarra</CardTitle>
                         <h6 className="card-category">Designer</h6>
                       </div>
@@ -332,7 +419,7 @@ function Homepage() {
             </Row>
           </Container>
         </div>
-        <div className="section landing-section" id="contactus">
+        {/* <div className="section landing-section" id="contactus">
           <Container>
             <Row>
               <Col className="ml-auto mr-auto" md="8">
@@ -379,7 +466,7 @@ function Homepage() {
               </Col>
             </Row>
           </Container>
-        </div>
+        </div> */}
       </div>
     </div>
   );
