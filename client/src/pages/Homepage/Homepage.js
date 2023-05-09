@@ -182,7 +182,7 @@ function Homepage() {
                     <a href="#pablo" onClick={(e) => e.preventDefault()}>
                       <img
                         alt="..."
-                        src={require("../../assets/img/faces/joe-gardner-2.jpg")}
+                        src={require("../../assets/img/faces/kaci-baum-2.jpg")}
                       />
                     </a>
                   </div>
